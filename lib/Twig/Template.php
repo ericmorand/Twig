@@ -112,7 +112,6 @@ abstract class Twig_Template
             }
         } catch (Twig_Error_Loader $e) {
             $e->setSourceContext(null);
-            $e->guess();
 
             throw $e;
         }
@@ -185,24 +184,7 @@ abstract class Twig_Template
         }
 
         if (null !== $template) {
-            try {
-                $template->$block($context, $blocks);
-            } catch (Twig_Error $e) {
-                if (!$e->getSourceContext()) {
-                    $e->setSourceContext($template->getSourceContext());
-                }
-
-                // this is mostly useful for Twig_Error_Loader exceptions
-                // see Twig_Error_Loader
-                if (false === $e->getTemplateLine()) {
-                    $e->setTemplateLine(-1);
-                    $e->guess();
-                }
-
-                throw $e;
-            } catch (Exception $e) {
-                throw new Twig_Error_Runtime(sprintf('An exception has been thrown during the rendering of a template ("%s").', $e->getMessage()), -1, $template->getSourceContext(), $e);
-            }
+            $template->$block($context, $blocks);
         } elseif (false !== $parent = $this->getParent($context)) {
             $parent->displayBlock($name, $context, array_merge($this->blocks, $blocks), false);
         } elseif (isset($blocks[$name])) {
@@ -333,13 +315,11 @@ abstract class Twig_Template
                 $e->setSourceContext($templateName ? new Twig_Source('', $templateName) : $this->getSourceContext());
             }
 
-            if ($e->getTemplateLine()) {
+            if ($e->getTemplateLine() !== -1) {
                 throw $e;
             }
 
-            if (!$line) {
-                $e->guess();
-            } else {
+            if ($line) {
                 $e->setTemplateLine($line);
             }
 
@@ -391,13 +371,6 @@ abstract class Twig_Template
         } catch (Twig_Error $e) {
             if (!$e->getSourceContext()) {
                 $e->setSourceContext($this->getSourceContext());
-            }
-
-            // this is mostly useful for Twig_Error_Loader exceptions
-            // see Twig_Error_Loader
-            if (false === $e->getTemplateLine()) {
-                $e->setTemplateLine(-1);
-                $e->guess();
             }
 
             throw $e;

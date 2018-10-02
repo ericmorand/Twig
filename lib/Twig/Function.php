@@ -18,10 +18,8 @@
  *
  * @see https://twig.symfony.com/doc/templates.html#functions
  */
-class Twig_Function
+class Twig_Function extends Twig_CallableWrapper
 {
-    private $name;
-    private $callable;
     private $options;
     private $arguments = array();
 
@@ -38,8 +36,8 @@ class Twig_Function
             @trigger_error('Overriding '.__CLASS__.' is deprecated since version 2.4.0 and the class will be final in 3.0.', E_USER_DEPRECATED);
         }
 
-        $this->name = $name;
-        $this->callable = $callable;
+        parent::__construct($name, $callable);
+
         $this->options = array_merge(array(
             'needs_environment' => false,
             'needs_context' => false,
@@ -50,21 +48,6 @@ class Twig_Function
             'deprecated' => false,
             'alternative' => null,
         ), $options);
-    }
-
-    public function getName()
-    {
-        return $this->name;
-    }
-
-    /**
-     * Returns the callable to execute for this function.
-     *
-     * @return callable|null
-     */
-    public function getCallable()
-    {
-        return $this->callable;
     }
 
     public function getNodeClass()

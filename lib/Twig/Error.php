@@ -74,10 +74,6 @@ class Twig_Error extends Exception
         $this->lineno = $lineno;
         $this->name = $name;
 
-        if (-1 === $lineno || null === $name || null === $this->sourcePath) {
-            $this->guessTemplateInfo();
-        }
-
         $this->rawMessage = $message;
 
         $this->updateRepr();
@@ -141,12 +137,6 @@ class Twig_Error extends Exception
         $this->updateRepr();
     }
 
-    public function guess()
-    {
-        $this->guessTemplateInfo();
-        $this->updateRepr();
-    }
-
     public function appendMessage($rawMessage)
     {
         $this->rawMessage .= $rawMessage;
@@ -195,68 +185,6 @@ class Twig_Error extends Exception
 
         if ($questionMark) {
             $this->message .= '?';
-        }
-    }
-
-    private function guessTemplateInfo()
-    {
-        $template = null;
-        $templateClass = null;
-
-        $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS | DEBUG_BACKTRACE_PROVIDE_OBJECT);
-        foreach ($backtrace as $trace) {
-            if (isset($trace['object']) && $trace['object'] instanceof Twig_Template && 'Twig_Template' !== get_class($trace['object'])) {
-                $currentClass = get_class($trace['object']);
-                $isEmbedContainer = 0 === strpos($templateClass, $currentClass);
-                if (null === $this->name || ($this->name == $trace['object']->getTemplateName() && !$isEmbedContainer)) {
-                    $template = $trace['object'];
-                    $templateClass = get_class($trace['object']);
-                }
-            }
-        }
-
-        // update template name
-        if (null !== $template && null === $this->name) {
-            $this->name = $template->getTemplateName();
-        }
-
-        // update template path if any
-        if (null !== $template && null === $this->sourcePath) {
-            $src = $template->getSourceContext();
-            $this->sourceCode = $src->getCode();
-            $this->sourcePath = $src->getPath();
-        }
-
-        if (null === $template || $this->lineno > -1) {
-            return;
-        }
-
-        $r = new ReflectionObject($template);
-        $file = $r->getFileName();
-
-        $exceptions = array($e = $this);
-        while ($e = $e->getPrevious()) {
-            $exceptions[] = $e;
-        }
-
-        while ($e = array_pop($exceptions)) {
-            $traces = $e->getTrace();
-            array_unshift($traces, array('file' => $e->getFile(), 'line' => $e->getLine()));
-
-            while ($trace = array_shift($traces)) {
-                if (!isset($trace['file']) || !isset($trace['line']) || $file != $trace['file']) {
-                    continue;
-                }
-
-                foreach ($template->getDebugInfo() as $codeLine => $templateLine) {
-                    if ($codeLine <= $trace['line']) {
-                        // update template line
-                        $this->lineno = $templateLine;
-
-                        return;
-                    }
-                }
-            }
         }
     }
 }

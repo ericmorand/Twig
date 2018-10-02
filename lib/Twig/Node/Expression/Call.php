@@ -40,7 +40,7 @@ abstract class Twig_Node_Expression_Call extends Twig_Node_Expression
                 $compiler->raw(sprintf('->%s', $callable[1]));
             } else {
                 $closingParenthesis = true;
-                $compiler->raw(sprintf('call_user_func_array($this->env->get%s(\'%s\')->getCallable(), array', ucfirst($this->getAttribute('type')), $this->getAttribute('name')));
+                $compiler->raw(sprintf('call_user_func_array($this->env->get%s(\'%s\')->getLocationAwareCallable(%d, $this->source), array', ucfirst($this->getAttribute('type')), $this->getAttribute('name'), $this->lineno));
             }
         }
 

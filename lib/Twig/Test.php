@@ -18,10 +18,8 @@
  *
  * @see https://twig.symfony.com/doc/templates.html#test-operator
  */
-class Twig_Test
+class Twig_Test extends Twig_CallableWrapper
 {
-    private $name;
-    private $callable;
     private $options;
     private $arguments = array();
 
@@ -38,29 +36,14 @@ class Twig_Test
             @trigger_error('Overriding '.__CLASS__.' is deprecated since version 2.4.0 and the class will be final in 3.0.', E_USER_DEPRECATED);
         }
 
-        $this->name = $name;
-        $this->callable = $callable;
+        parent::__construct($name, $callable);
+
         $this->options = array_merge(array(
             'is_variadic' => false,
             'node_class' => 'Twig_Node_Expression_Test',
             'deprecated' => false,
             'alternative' => null,
         ), $options);
-    }
-
-    public function getName()
-    {
-        return $this->name;
-    }
-
-    /**
-     * Returns the callable to execute for this test.
-     *
-     * @return callable|null
-     */
-    public function getCallable()
-    {
-        return $this->callable;
     }
 
     public function getNodeClass()

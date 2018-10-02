@@ -18,10 +18,8 @@
  *
  * @see https://twig.symfony.com/doc/templates.html#filters
  */
-class Twig_Filter
+class Twig_Filter extends Twig_CallableWrapper
 {
-    private $name;
-    private $callable;
     private $options;
     private $arguments = array();
 
@@ -38,8 +36,8 @@ class Twig_Filter
             @trigger_error('Overriding '.__CLASS__.' is deprecated since version 2.4.0 and the class will be final in 3.0.', E_USER_DEPRECATED);
         }
 
-        $this->name = $name;
-        $this->callable = $callable;
+        parent::__construct($name, $callable);
+
         $this->options = array_merge(array(
             'needs_environment' => false,
             'needs_context' => false,
@@ -52,21 +50,6 @@ class Twig_Filter
             'deprecated' => false,
             'alternative' => null,
         ), $options);
-    }
-
-    public function getName()
-    {
-        return $this->name;
-    }
-
-    /**
-     * Returns the callable to execute for this filter.
-     *
-     * @return callable|null
-     */
-    public function getCallable()
-    {
-        return $this->callable;
     }
 
     public function getNodeClass()
